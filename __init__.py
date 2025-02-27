@@ -1,7 +1,7 @@
 bl_info = {
     "name": "UV Flatten Tool",
     "author": "maylog",
-    "version": (1, 0, 2),
+    "version": (1, 0, 3),
     "blender": (4, 4, 0),
     "location": "Object > Flatten UV to SK",
     "description": "Flatten mesh to active UV coordinates and store as shape key",
@@ -70,8 +70,8 @@ class MeshUVFlatten:
                 vert.co = Vector((uv.x, uv.y, 0.0))
         return bm
     
-    def apply_flatten_as_shape_key(self):
-        """将摊平结果存储为形态键，使用当前活动UV名称"""
+    def apply_flatten_as_shape_key(self, use_existing_seams=True):
+        """将摊平结果存储为形态键，根据用户选择处理缝合边"""
         mesh = self.obj.data
         
         if not mesh.uv_layers.active:
@@ -79,8 +79,9 @@ class MeshUVFlatten:
         active_uv_name = mesh.uv_layers.active.name
         shape_key_name = f"{active_uv_name}_Flattened"
         
-        # 标记UV孤岛的缝合边
-        self.mark_seams_by_uv_islands()
+        # 根据用户选择处理缝合边
+        if not use_existing_seams:
+            self.mark_seams_by_uv_islands()  # 插件生成缝合边
         
         # 创建BMesh并分割缝合边
         bm = bmesh.new()
@@ -109,8 +110,29 @@ class MeshUVFlatten:
 
 class MESH_OT_uv_flatten(bpy.types.Operator):
     bl_idname = "mesh.uv_flatten"
-    bl_label = "Flatten UV to SK"  # 内部标签保持简洁
+    bl_label = "Flatten UV to SK"
     bl_options = {'REGISTER', 'UNDO'}
+    
+    # 定义单选选项
+    seam_option: bpy.props.EnumProperty(
+        name="Seam Handling",
+        description="Choose how to handle seams",
+        items=[
+            ('EXISTING', "Use Existing Seams", "Use seams I have already created"),
+            ('GENERATE', "Generate Seams", "Let plugin generate seams (may fail in some cases)")
+        ],
+        default='EXISTING'
+    )
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Choose seam handling option:")
+        layout.prop(self, "seam_option", expand=True)  # 单选按钮形式
+        if self.seam_option == 'GENERATE':
+            layout.label(text="Warning: Plugin-generated seams may fail.")
     
     @classmethod
     def poll(cls, context):
@@ -121,12 +143,17 @@ class MESH_OT_uv_flatten(bpy.types.Operator):
         try:
             obj = context.active_object
             flattener = MeshUVFlatten(obj)
-            flattener.apply_flatten_as_shape_key()
+            # 根据用户选择决定是否生成缝合边
+            use_existing = self.seam_option == 'EXISTING'
+            flattener.apply_flatten_as_shape_key(use_existing_seams=use_existing)
             active_uv_name = obj.data.uv_layers.active.name
             self.report({'INFO'}, f"UV flatten stored as shape key '{active_uv_name}_Flattened'")
             return {'FINISHED'}
         except ValueError as e:
             self.report({'ERROR'}, str(e))
+            return {'CANCELLED'}
+        except RuntimeError as e:
+            self.report({'ERROR'}, f"Context error: {str(e)}. Try manual seams instead.")
             return {'CANCELLED'}
 
 def menu_func(self, context):
