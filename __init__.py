@@ -1,7 +1,7 @@
 bl_info = {
     "name": "UV Flatten Tool",
     "author": "maylog",
-    "version": (1, 0, 4),
+    "version": (1, 0, 7),
     "blender": (4, 4, 0),
     "location": "Object > Flatten UV to SK",
     "description": "Flatten mesh to active UV coordinates and store as shape key",
