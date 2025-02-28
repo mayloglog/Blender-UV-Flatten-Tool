@@ -1,8 +1,24 @@
-This plugin allows you to slap the model flat by UV and store it as a morph key. This operation generates stitching edges along the UV silos and splits the model by stitching edges for quick triangulation to quadrilateralization or further processing of the model.
-Note: This operation will make changes to the original model and add a Morphological Key, if there is a special need to back up the original model file.
-The principle of the plug-in is to first generate the stitching edge by UV silo, then cut the model by the stitching edge, then transform the XYZ values of the model by UV coordinates, and finally store the deformation into the morphology key with the name of the current UV layer.
+UV Flatten Tool is a straightforward plugin that flattens a mesh based on active UV coordinates and stores it as a shape key.
+While Blender's Geometry Nodes can achieve similar results, this plugin’s shape keys enable convenient follow-up operations like animation or tweaking.
 
+Tutorial:
+1. Select a mesh object with a UV map.
+2. Go to the “Object” menu and click “Flatten UV to SK.”
+3. In the dialog, choose:
+   - “Use Existing Seams”: Use pre-marked seams.
+   - “Generate Seams”: Let the plugin generate seams (older files may need copying to a new scene).
+4. Confirm to flatten the UV and create a shape key.
+5. Adjust the shape key value in the “Shape Keys” panel to see the effect.
+Note: The plugin modifies the original model; back up your file first.
 
-本插件可以按UV拍平模型，并存储为形态键。 此操作会沿UV孤岛生成缝合边，并按缝合边拆开模型， 以便快捷三角面转四边面，或者进一步处理模型。
-注意：此操作会让更改原始模型并增加形态键，如果有特殊需要，需要备份原始模型文件。
-插件原理是首先按UV孤岛生成缝合边，然后按缝合边切开模型，然后按UV坐标变换模型的XYZ值，最后把形变存储至以当前UV层为名称的形态键中。
+UV Flatten Tool 是一个简单易用的插件，用于将网格按活动UV坐标压平并存储为形态键。
+虽然Blender的几何节点也能实现类似功能，但此插件生成的形态键便于用户进行后续编辑和操作，如动画或调整。
+使用教程：
+1. 选择一个有UV贴图的网格物体。
+2. 在“Object”菜单中点击“Flatten UV to SK”。
+3. 在弹出的对话框中选择：
+   - “Use Existing Seams”：使用已标记的缝合边。
+   - “Generate Seams”：让插件生成缝合边（老文件可能需复制到新场景）。
+4. 点击确认，插件将压平UV并生成形态键。
+5. 在“Shape Keys”面板调整形态键值以查看效果。
+注意：插件会修改原始模型，请备份文件。
